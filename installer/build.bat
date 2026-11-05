@@ -35,7 +35,11 @@ echo [4/7] Arabic + English language data (tessdata_best)...
 python tools\download_models.py --tessdata || goto :err
 
 echo [5/7] Automated tests...
-python -m pytest -q tests || goto :err
+python -m pytest -q tests
+if errorlevel 1 (
+  echo pytest exit code: %errorlevel%
+  goto :err
+)
 
 echo [6/7] PyInstaller...
 pyinstaller --noconfirm --clean installer\smart_auth.spec || goto :err

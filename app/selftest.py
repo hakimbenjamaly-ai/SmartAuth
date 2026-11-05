@@ -140,4 +140,8 @@ def run(log_path: Path | None = None) -> int:
         print(text)
     except Exception:  # noqa: BLE001
         pass
-    return 0 if ok else 1
+    code = 0 if ok else 1
+    if "PySide6.QtWidgets" in sys.modules and getattr(sys, "frozen", False):
+        sys.stdout.flush()
+        os._exit(code)  # تجنب انهيار Qt أثناء تفكيك المفسّر
+    return code
