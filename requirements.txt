@@ -1,0 +1,18 @@
+# المكتبات الأساسية (تُثبت مرة واحدة على جهاز البناء، ثم تُضمّن في ملف التثبيت)
+PySide6>=6.6
+numpy>=1.26
+opencv-python-headless>=4.9
+scikit-image>=0.22
+Pillow>=10.0
+pytesseract>=0.3.10
+pdfplumber>=0.11
+pypdfium2>=4.25
+openpyxl>=3.1
+xlrd>=2.0
+pywin32>=306 ; sys_platform == "win32"
+pytwain>=2.2 ; sys_platform == "win32"
+
+# أدوات البناء والاختبار
+pyinstaller>=6.3
+pytest>=8.0
+reportlab>=4.0

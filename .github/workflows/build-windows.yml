@@ -1,0 +1,74 @@
+# بناء ملف التثبيت SmartAuth_Setup.exe تلقائياً على خوادم GitHub (Windows) دون الحاجة لجهاز بناء.
+# بعد رفع المشروع إلى GitHub: Actions ← Build Windows Installer ← Run workflow
+# ثم نزّل الملف من قسم Artifacts في صفحة التشغيل.
+name: Build Windows Installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      with_handwriting:
+        description: "تضمين نموذج الكتابة اليدوية الإنجليزية (يزيد الحجم ~1.5GB)"
+        type: boolean
+        default: false
+      arabic_htr_model:
+        description: "معرّف نموذج TrOCR عربي على HuggingFace (اختياري)"
+        type: string
+        default: ""
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Tesseract OCR and Inno Setup
+        shell: pwsh
+        run: |
+          choco install tesseract innosetup -y --no-progress
+          if (-not (Test-Path "C:\Program Files\Tesseract-OCR\tesseract.exe")) { throw "Tesseract not installed" }
+
+      - name: Arabic wizard language for installer
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          Invoke-WebRequest "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/Arabic.isl" -OutFile installer\Arabic.isl
+
+      - name: Build
+        shell: cmd
+        env:
+          WITH_HANDWRITING: ${{ github.event.inputs.with_handwriting == 'true' && '1' || '0' }}
+          ARABIC_HTR_MODEL: ${{ github.event.inputs.arabic_htr_model }}
+          PYTHONUTF8: "1"
+        run: installer\build.bat
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: SmartAuth_Setup
+          path: dist_installer/*.exe
+          if-no-files-found: error
+
+      - name: Portable version (zip of program folder)
+        shell: pwsh
+        run: Compress-Archive -Path dist\SmartAuth\* -DestinationPath dist\SmartAuth_portable.zip
+
+      - name: Upload portable version
+        uses: actions/upload-artifact@v4
+        with:
+          name: SmartAuth_Portable
+          path: dist/SmartAuth_portable.zip
+
+      - name: Upload self-test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selftest-log
+          path: dist/selftest.log
+          if-no-files-found: ignore

@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+dist/
+build/
+dist_installer/
+tesseract/
+tessdata/
+models/
+demo_documents/
+.pytest_cache/

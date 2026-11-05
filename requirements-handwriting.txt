@@ -1,0 +1,6 @@
+# اختياري: نموذج التعرف على الكتابة اليدوية (TrOCR) - يعمل محلياً على المعالج دون إنترنت.
+# يزيد حجم ملف التثبيت بحوالي 1-2 جيجابايت.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.2
+transformers>=4.40
+sentencepiece
