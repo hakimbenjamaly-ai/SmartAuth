@@ -23,11 +23,16 @@ from synth import make_person_template, render_signature  # noqa: E402
 
 FONT = next((f for f in ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", r"C:\Windows\Fonts\arial.ttf",
                           r"C:\Windows\Fonts\tahoma.ttf") if Path(f).exists()), None)
-try:
-    from PIL import features as _pf
-    HAS_RAQM = bool(_pf.check("raqm"))
-except Exception:
-    HAS_RAQM = False
+def _raqm_works() -> bool:
+    try:
+        ImageDraw.Draw(Image.new("RGB", (50, 20))).text((0, 0), "اختبار", direction="rtl", language="ar",
+                                                        font=ImageFont.truetype(FONT, 12))
+        return True
+    except Exception:
+        return False
+
+
+HAS_RAQM = _raqm_works()
 
 
 @pytest.fixture()
@@ -195,7 +200,10 @@ def test_ocr_import_review_flow(ctx, tmp_path):
         "Email: k.benali@example.ly",
         "Date: 12/05/2025",
     ], tpl)
-    _make_doc_image(src_dir / "doc_ar.png", ["الاسم: خالد عمر", "الصفة: سفير"])
+    if HAS_RAQM:
+        _make_doc_image(src_dir / "doc_ar.png", ["الاسم: خالد عمر", "الصفة: سفير"])
+    else:  # بدون تشكيل عربي في Pillow: مستند إنجليزي ثانٍ بدلاً منه
+        _make_doc_image(src_dir / "doc_ar.png", ["Name: Khalid Omar", "Title: Ambassador"])
     shutil.copy(src_dir / "doc1.png", src_dir / "sub" / "copy_of_doc1.png")  # نفس البصمة
     sid = sv.sources.add("ملفات السفارات", str(src_dir), _cat(ctx, "LY_EMB_ABROAD"), "png,pdf")
     chk = sv.sources.check(sid)

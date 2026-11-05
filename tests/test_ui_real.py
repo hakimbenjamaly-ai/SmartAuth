@@ -65,7 +65,8 @@ def test_main_window_pages(qapp, ctx, role):
         qapp.processEvents()
         assert w.pages[i] is not None
     # صفحة البحث تعرض الشخص، وصفحة بيانات الشخص تُبنى
-    page = w.pages[1]
+    from app.ui.pages.persons import PersonSearchPage
+    page = next(p for p in w.pages if isinstance(p, PersonSearchPage) and p.mode == "all")
     assert page.table.rowCount() == 1
     from app.ui.pages.persons import PersonProfileDialog
     d = PersonProfileDialog(ctx, pid, w)
