@@ -15,7 +15,8 @@ on:
         type: string
         default: ""
   push:
-    tags: ["v*"]
+    branches: [main]
+    paths-ignore: ["**.md"]
 
 jobs:
   build:
