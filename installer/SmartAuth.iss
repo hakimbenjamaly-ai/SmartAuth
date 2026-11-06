@@ -2,7 +2,9 @@
 ; البناء: iscc installer\SmartAuth.iss  (بعد تشغيل PyInstaller)
 
 #define AppName "منظومة التصديقات والأرشفة الذكية"
-#define AppVersion "1.0.0"
+#ifndef AppVersion
+  #define AppVersion "1.0.0"
+#endif
 
 [Setup]
 AppId={{6C1F2B4E-7A1D-4C8E-9F33-5B1A0E7D2C91}
@@ -21,6 +23,7 @@ PrivilegesRequired=admin
 WizardStyle=modern
 DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\SmartAuth.exe
+SetupIconFile=app.ico
 
 [Languages]
 ; ملف الترجمة العربية لمعالج التثبيت (Arabic.isl) غير مضمن رسمياً في Inno Setup:

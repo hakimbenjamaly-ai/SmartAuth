@@ -18,6 +18,9 @@ on:
     branches: [main]
     paths-ignore: ["**.md"]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -38,14 +41,22 @@ jobs:
       - name: Arabic wizard language for installer
         shell: pwsh
         continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          Invoke-WebRequest "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/Arabic.isl" -OutFile installer\Arabic.isl
+          $paths = gh api "repos/jrsoftware/issrc/git/trees/main?recursive=1" --jq '.tree[].path' | Where-Object { $_ -match '(?i)/arabic[^/]*\.isl$' }
+          Write-Host "Found: $paths"
+          $p = @($paths)[0]
+          if (-not $p) { throw "Arabic.isl not found in issrc" }
+          Invoke-WebRequest "https://raw.githubusercontent.com/jrsoftware/issrc/main/$p" -OutFile installer\Arabic.isl
+          Get-Item installer\Arabic.isl
 
       - name: Build
         shell: cmd
         env:
           WITH_HANDWRITING: ${{ github.event.inputs.with_handwriting == 'true' && '1' || '0' }}
           ARABIC_HTR_MODEL: ${{ github.event.inputs.arabic_htr_model }}
+          APP_VERSION: 1.0.${{ github.run_number }}
           PYTHONUTF8: "1"
         run: installer\build.bat
 
@@ -73,3 +84,12 @@ jobs:
           name: selftest-log
           path: dist/selftest.log
           if-no-files-found: ignore
+
+      - name: Publish release (permanent download link)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $v = "v1.0.${{ github.run_number }}"
+          $notes = "SmartAuth $v - commit ${{ github.sha }}"
+          gh release create $v (Get-ChildItem dist_installer\*.exe).FullName dist\SmartAuth_portable.zip --title "SmartAuth $v" --notes $notes --target ${{ github.sha }} --latest

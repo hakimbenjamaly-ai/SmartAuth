@@ -11,6 +11,8 @@ for folder in ("tesseract", "tessdata", "models"):
     if p.exists():
         datas.append((str(p), folder))
 icon = ROOT / "installer" / "app.ico"
+if icon.exists():
+    datas.append((str(icon), "."))
 
 # packages that ship native DLLs / data files or use lazy imports
 for pkg in ("pypdfium2", "pypdfium2_raw", "skimage", "pdfplumber", "pdfminer", "cv2"):

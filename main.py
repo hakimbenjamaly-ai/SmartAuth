@@ -21,6 +21,12 @@ def main() -> int:
     app.setLayoutDirection(Qt.RightToLeft)
     app.setFont(QFont("Segoe UI", 10))
     app.setStyleSheet(QSS)
+    from PySide6.QtGui import QIcon
+    from app.core.config import resource_root
+    for ico in (resource_root() / "app.ico", resource_root() / "installer" / "app.ico"):
+        if ico.exists():
+            app.setWindowIcon(QIcon(str(ico)))
+            break
 
     def excepthook(t, v, tb):
         traceback.print_exception(t, v, tb)

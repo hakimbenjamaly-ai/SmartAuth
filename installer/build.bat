@@ -54,9 +54,10 @@ type dist\selftest.log
 
 set ISCC="C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
 if not exist %ISCC% goto :noiscc
-%ISCC% installer\SmartAuth.iss || goto :err
+if "%APP_VERSION%"=="" set APP_VERSION=1.0.0
+%ISCC% /DAppVersion=%APP_VERSION% installer\SmartAuth.iss || goto :err
 echo.
-echo SUCCESS: dist_installer\SmartAuth_Setup_1.0.0.exe
+echo SUCCESS: dist_installer\SmartAuth_Setup_%APP_VERSION%.exe
 exit /b 0
 
 :noiscc
